@@ -1,0 +1,88 @@
+name: Build Windows installer
+
+# Builds dist/ApexTorrent_Setup.exe on a GitHub-hosted Windows machine.
+#   Manual run : repo > Actions tab > "Build Windows installer" > Run workflow
+#   Release    : push a tag like v1.0.0 and the .exe is also attached to a GitHub Release
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write   # only used to attach the installer to a release on tag builds
+
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          architecture: x64
+
+      - name: Show Python in use
+        shell: pwsh
+        run: |
+          python -VV
+          py -0p
+
+      - name: Make sure Inno Setup is installed
+        shell: pwsh
+        run: |
+          $paths = @("${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe", "${env:ProgramFiles}\Inno Setup 6\ISCC.exe")
+          if (-not ($paths | Where-Object { Test-Path $_ })) { choco install innosetup -y --no-progress }
+          if (-not ($paths | Where-Object { Test-Path $_ })) { throw "Inno Setup is not installed" }
+
+      - name: Build (assets, tests, PyInstaller, bundle self-test, installer)
+        shell: cmd
+        run: build_installer.bat
+
+      - name: Show bundle self-test result
+        if: always()
+        shell: pwsh
+        run: |
+          $f = Join-Path $env:TEMP "apextorrent_selftest.txt"
+          if (Test-Path $f) { Get-Content $f } else { "no self-test result was written" }
+
+      - name: Checksum
+        shell: pwsh
+        run: |
+          $h = (Get-FileHash dist\ApexTorrent_Setup.exe -Algorithm SHA256).Hash
+          "ApexTorrent_Setup.exe SHA-256: $h" | Tee-Object -FilePath $env:GITHUB_STEP_SUMMARY -Append
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ApexTorrent_Setup
+          path: dist/ApexTorrent_Setup.exe
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Attach installer to the GitHub Release (tag builds only)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/ApexTorrent_Setup.exe
+
+      # If anything above failed, keep what was built so the failure can be diagnosed and the app can still be tried:
+      # logs, the PyInstaller warnings file, and (when it got that far) a portable zip of the bundled app.
+      - name: Collect diagnostics (failed builds only)
+        if: failure()
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force diag | Out-Null
+          $files = @("$env:TEMP\apextorrent_selftest.txt", "$env:USERPROFILE\.apextorrent\apextorrent.log", "build\apextorrent\warn-apextorrent.txt")
+          foreach ($f in $files) { if (Test-Path $f) { Copy-Item $f diag } }
+          if (Test-Path "dist\ApexTorrent\ApexTorrent.exe") { Compress-Archive -Path "dist\ApexTorrent" -DestinationPath "diag\ApexTorrent_portable.zip" }
+          Get-ChildItem diag | Format-Table Name, Length
+
+      - name: Upload diagnostics (failed builds only)
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build_diagnostics
+          path: diag
+          if-no-files-found: ignore
+          retention-days: 7
