@@ -1,13 +1,13 @@
 ; ApexTorrent installer (Inno Setup 6.3 or newer).
-; Build:  ISCC.exe /DMyAppVersion=1.0.0 installer.iss      (build_installer.bat does this for you)
+; Build:  ISCC.exe /DMyAppVersion=1.1.0 installer.iss      (build_installer.bat does this for you)
 ; Input:  dist\ApexTorrent\   (PyInstaller one-directory output)     Output: dist\ApexTorrent_Setup.exe
 
 #define MyAppName      "ApexTorrent"
 #ifndef MyAppVersion
-  #define MyAppVersion "1.0.0"
+  #define MyAppVersion "1.1.0"
 #endif
-#define MyAppPublisher "ApexTorrent Project"
-#define MyAppURL       "https://example.com/apextorrent"
+#define MyAppPublisher "Adeeb Khan"
+#define MyAppURL       "https://github.com/KhanAdeeb1/Apex_Torrent"
 #define MyAppExeName   "ApexTorrent.exe"
 #define MyAppMutex     "ApexTorrentSingleInstanceMutex"
 #define MyTorrentProgId "ApexTorrent.torrent"

@@ -276,7 +276,9 @@ class SpecTests(unittest.TestCase):
         self.assertEqual(strings["CompanyName"], version.PUBLISHER)
         self.assertEqual(strings["FileVersion"], version.APP_VERSION)
         self.assertEqual(strings["OriginalFilename"], "ApexTorrent.exe")
-        self.assertEqual((vi.ffi.fileVersionMS, vi.ffi.fileVersionLS), (0x00010000, 0))  # 1.0.0.0
+        nums = [int(x) for x in version.APP_VERSION.split('.')] + [0, 0, 0]
+        self.assertEqual((vi.ffi.fileVersionMS, vi.ffi.fileVersionLS),
+                         ((nums[0] << 16) | nums[1], (nums[2] << 16) | nums[3]))
 
     def test_spec_is_valid_python_and_mentions_required_pieces(self):
         src = (ROOT / "apextorrent.spec").read_text()
