@@ -1,0 +1,24 @@
+ApexTorrent third-party notices
+
+ApexTorrent bundles the following open-source components. Each remains under its own license.
+
+libtorrent (libtorrent-rasterbar)  -  BSD 3-Clause License
+  Copyright (c) Arvid Norberg and contributors.  https://libtorrent.org
+
+PySide6 / Qt for Python and Qt 6  -  GNU Lesser General Public License v3 (LGPLv3)
+  Copyright (c) The Qt Company Ltd. and contributors.  https://www.qt.io  https://doc.qt.io/qtforpython
+  ApexTorrent uses these libraries as separate, dynamically linked files located in the installation folder
+  (the "_internal" directory, including its "PySide6" subfolder). You may replace them with a modified version
+  of the same libraries in accordance with the LGPLv3. The LGPLv3 text and the Qt source code are available from
+  the links above.
+
+psutil  -  BSD 3-Clause License
+  Copyright (c) Giampaolo Rodola and contributors.  https://github.com/giampaolo/psutil
+
+Python  -  Python Software Foundation License
+  Copyright (c) Python Software Foundation.  https://www.python.org
+
+PyInstaller bootloader  -  GPLv2 with the PyInstaller exception permitting use in non-GPL programs.
+  https://pyinstaller.org
+
+Full license texts for the above are available at the project links listed.

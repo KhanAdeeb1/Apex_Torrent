@@ -1,0 +1,3 @@
+libtorrent
+PySide6
+psutil
